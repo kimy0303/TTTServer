@@ -4,30 +4,51 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+var session = require('express-session');
+var fileStore = require('session-file-store')(session);
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
 var app = express();
 
+app.use(session({
+  secret: 'keybord cat',
+  resave : false,
+  saveUninitialized: true,
+  store: new fileStore()
+}));
+
+// const MongoClient = require('mongodb').MongoClient;
+// const assert = require('assert');
+ 
+// // Connection URL
+// const url = 'mongodb://localhost:27017';
+ 
+// // Database Name
+// const dbName = 'ticktactoe';
+ 
+// // Use connect method to connect to the server
+// MongoClient.connect(url, function(err, client) {
+//   assert.equal(null, err);
+//   console.log("Connected successfully to server");
+ 
+//   const db = client.db(dbName);
+//   app.set('database', db);
+ 
+//   // client.close();
+// });
+
+
 const MongoClient = require('mongodb').MongoClient;
-const assert = require('assert');
- 
-// Connection URL
-const url = 'mongodb://localhost:27017';
- 
-// Database Name
-const dbName = 'ticktactoe';
- 
-// Use connect method to connect to the server
-MongoClient.connect(url, function(err, client) {
-  assert.equal(null, err);
-  console.log("Connected successfully to server");
- 
+const uri = "mongodb+srv://myfishadmin:<myfishAdmin1234>@myserver-6wrt6.mongodb.net/test?retryWrites=true&w=majority";
+const client = new MongoClient(uri, { useNewUrlParser: true });
+client.connect(err => {
+  const dbName = 'tictactoe';
   const db = client.db(dbName);
   app.set('database', db);
- 
-  // client.close();
 });
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
