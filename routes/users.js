@@ -27,7 +27,8 @@ router.get('/info', function(req, res, next) {
         
         if (err) throw(err);
         if (result) {
-          res.status(200).json({message: result});
+          var resultStr = JSON.stringify(result);
+          res.status(200).json({message: resultStr});
         } else {
           res.status(204).json({message: 'No Content'});
         }
@@ -73,7 +74,11 @@ router.post('/signup', function(req, res, next) {
             if (err) throw(err);
             if (result.ops.length > 0) {
               req.session.user_id = result.insertedId.toString();
-              res.status(200).json({message: 'Ok'});
+
+              var resultObj = {name:name, score:0};
+              var resultStr = JSON.stringify(resultObj);
+
+              res.status(200).json({message: resultStr});
             } else {
               res.status(503).json({message: 'Server Error'});
             }
@@ -88,7 +93,7 @@ router.post('/signup', function(req, res, next) {
 router.get('/logout', function(req, res, next) {
   req.session.destroy(function(err) {
     res.clearCookie('connect.sid');
-    res.json({message:'200 Ok'});
+    res.status(200).json({message:'Ok'});
   });
 });
 
@@ -114,14 +119,19 @@ router.post('/signin', function(req, res, next) {
       crypto.pbkdf2(password, saltStr, 102391, 64, 'sha512', function(err, key) {
         var cryptoPassword = key.toString('base64');
 
-        usersCollection.findOne({username: username, password: cryptoPassword}, 
+        usersCollection.findOne({username: username, password: cryptoPassword},
+          {projection: {name: true, score: true}},
           function(err, result) {
             if (err) throw(err);
             if (result) {
               req.session.user_id = result._id.toString();
-              res.json({message:'200 Ok'});
+
+              var resultObj = {'name':result.name, 'score':result.score};
+              var resultStr = JSON.stringify(resultObj);
+
+              res.status(200).json({message:resultStr});              
             } else {
-              res.json({message:'204 No Content'});
+              res.status(204).json({message:'No Content'});
             }
           });
       });
@@ -145,12 +155,16 @@ router.post('/addscore', function(req, res, next) {
 
   if (userId) {
     var usersCollection = db.collection('users');
-    usersCollection.update({_id:mongodb.ObjectID(userId)}, {$inc:{score:score}}, function(err, result) {
+    usersCollection.findOneAndUpdate({_id:mongodb.ObjectID(userId)}, {$inc:{score:score}}, {returnOriginal:false}, function(err, result) {
       if (err) throw(err);
+
+      var resultObj = { name: result.value.name, score: result.value.score};
+      var resultStr = JSON.stringify(resultObj);
+
       if (result) {
-        res.json({message:'200 Ok'});
+        res.status(200).json({message:resultStr});
       } else {
-        res.json({message:'204 No Content'});
+        res.status(200).json({message:'No Content'});
       }
     });
   } else {

@@ -9,6 +9,7 @@ var fileStore = require('session-file-store')(session);
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var chatRouter = require('./routes/chat');
 
 var app = express();
 
@@ -28,12 +29,13 @@ const dbName = 'tictactoe';
 // Use connect method to connect to the server
 MongoClient.connect(url, function(err, client) {
   assert.equal(null, err);
+  console.log("Connected successfully to server");
   const db = client.db(dbName);
   app.set('database', db);
 });
 
 // const MongoClient = require('mongodb').MongoClient;
-// const uri = "mongodb+srv://myfishadmin:myfishadmin1234@myserver-6wrt6.mongodb.net/test?retryWrites=true&w=majority";
+// const uri = "mongodb+srv://myfishadmin:myfishadmin1234@cluster0-l9mns.mongodb.net/test?retryWrites=true&w=majority";
 // const client = new MongoClient(uri, { useNewUrlParser: true });
 // client.connect(err => {
 //   const dbName = 'tictactoe';
@@ -53,6 +55,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/chat', chatRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
