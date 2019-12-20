@@ -113,7 +113,6 @@ router.post('/signin', function(req, res, next) {
 
   usersCollection.findOne({username: username}, function(err, result) {
     if (err) throw(err);
-
     if (result) {
       var saltStr = result.salt;
       crypto.pbkdf2(password, saltStr, 102391, 64, 'sha512', function(err, key) {
@@ -124,12 +123,13 @@ router.post('/signin', function(req, res, next) {
           function(err, result) {
             if (err) throw(err);
             if (result) {
-              req.session.user_id = result._id.toString();
-
-              var resultObj = {'name':result.name, 'score':result.score};
-              var resultStr = JSON.stringify(resultObj);
-
-              res.status(200).json({message:resultStr});              
+              req.session.regenerate(function(err) {
+                req.session.user_id = result._id.toString();
+                var resultObj = {'name':result.name, 'score':result.score};
+                var resultStr = JSON.stringify(resultObj);
+                res.status(200).json({message:resultStr});        
+              });
+                    
             } else {
               res.status(204).json({message:'No Content'});
             }
