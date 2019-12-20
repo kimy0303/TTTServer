@@ -14,7 +14,7 @@ router.post('/add', function(req, res, next) {
   var userCollection = db.collection('users');
   userCollection.findOne({_id:mongodb.ObjectID(req.session.user_id)},
    {projection:{_id:false, name:true}}, 
-   function(err, userResult) {
+   function(err, userResult) { 
      if (err) throw(err);
     
      // 2. 메세지의 Seq. 찾기
