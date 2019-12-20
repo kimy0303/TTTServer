@@ -7,8 +7,10 @@ router.post('/add', function(req, res, next) {
   var message = req.body.message;
   var db = req.app.get('database');
   
-
-  // 1. 유저이름 찾기
+  var userId = req.session.user_id;
+  
+  if (userId) {
+    // 1. 유저이름 찾기
   var userCollection = db.collection('users');
   userCollection.findOne({_id:mongodb.ObjectID(req.session.user_id)},
    {projection:{_id:false, name:true}}, 
@@ -30,6 +32,9 @@ router.post('/add', function(req, res, next) {
         });
       });
     });
+  } else {
+    res.status(401).send('Unauthorized')
+  }
   });
 // 서버에서 클라이언트로 메세지 전송
 router.get('/:seq', function(req, res, next) {
