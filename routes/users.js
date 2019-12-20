@@ -30,9 +30,12 @@ router.get('/info', function(req, res, next) {
           var resultStr = JSON.stringify(result);
           res.status(200).json({message: resultStr});
         } else {
-          res.status(204).json({message: 'No Content'});
+          res.status(401).json({message: 'Unauthorized'});
         }
     });
+  }
+  else{
+    res.status(401).json({message: 'Unauthorized'});
   }
 });
 
