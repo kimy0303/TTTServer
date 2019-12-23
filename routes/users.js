@@ -3,17 +3,12 @@ var router = express.Router();
 var crypto = require('crypto');
 var mongodb = require('mongodb');
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
-
 /* 유저정보 */
 router.get('/info', function(req, res, next) {
   var db = req.app.get('database');
 
   if (db == undefined) {
-    res.status(503).json({message: '503 Server Error'});
+    res.status(503).json({message: '서버 오류가 발생했습니다'});
     return;
   }
 
@@ -30,12 +25,12 @@ router.get('/info', function(req, res, next) {
           var resultStr = JSON.stringify(result);
           res.status(200).json({message: resultStr});
         } else {
-          res.status(401).json({message: 'Unauthorized'});
+          res.status(401).json({message: '로그인이 필요합니다.'});
         }
     });
   }
   else{
-    res.status(401).json({message: 'Unauthorized'});
+    res.status(401).json({message: '로그인이 필요합니다.'});
   }
 });
 
@@ -48,13 +43,13 @@ router.post('/signup', function(req, res, next) {
   var db = req.app.get('database');
 
   if (db == undefined) {
-    res.json({message:'503 Server Error'});
+    res.json({message:'서버 오류가 발생했습니다'});
     return;
   }
 
   var validate = userValidation(username, password);
   if (validate == false) {
-    res.json({message:'400 Bad Request'});
+    res.status(400).json({message:'유효하지 않은 정보를 입력했습니다.'});
     return;
   }
 
@@ -64,7 +59,7 @@ router.post('/signup', function(req, res, next) {
     if (err) throw(err);
 
     if (result > 0) {
-      res.json({message: '400 Bad Request'});
+      res.status(400).json({message: '이미 동일한 유저가 존재합니다.ㅋ'});
       return;
     } else {
       crypto.randomBytes(64, function(err, buf) {
@@ -83,7 +78,7 @@ router.post('/signup', function(req, res, next) {
 
               res.status(200).json({message: resultStr});
             } else {
-              res.status(503).json({message: 'Server Error'});
+              res.status(503).json({message: '서버 오류가 발생했습니다.'});
             }
           });
         });  
@@ -108,7 +103,7 @@ router.post('/signin', function(req, res, next) {
   var db = req.app.get('database');
 
   if (db == undefined) {
-    res.json({message:'503 Server Error'});
+    res.status(503).json({message:'서버 오류가 발생했습니다.'});
     return;
   }
 
@@ -134,12 +129,12 @@ router.post('/signin', function(req, res, next) {
               });
                     
             } else {
-              res.status(204).json({message:'No Content'});
+              res.status(404).json({message:'비밀번호가 틀렸습니다.'});
             }
           });
       });
     } else {
-      res.json({message:'204 No Content'});
+      res.status(404).json({message:'해당 계정이 없습니다.'});
     }
   });
 });
@@ -150,7 +145,7 @@ router.post('/addscore', function(req, res, next) {
 
   var db = req.app.get('database');
   if (db == undefined) {
-    res.json({message: '503 Server Error'});
+    res.status(503).json({message: '서버 오류가 발생했습니다.'});
     return;
   }
 
@@ -167,12 +162,12 @@ router.post('/addscore', function(req, res, next) {
       if (result) {
         res.status(200).json({message:resultStr});
       } else {
-        res.status(200).json({message:'No Content'});
+        res.status(503).json({message:'서버 오류가 발생했습니다.'});
       }
     });
   } else {
     // res.json({message:'401 Unauthorized'})
-    res.status(401).send('Unauthorized');
+    res.status(401).send('로그인이 필요합니다');
   }
 });
 
