@@ -181,6 +181,7 @@ var userValidation = function(username, password) {
   if (password.length < 4 || password.length > 12) {
     return false;
   }
+  
   return true;
 }
 
