@@ -19,11 +19,13 @@ module.exports = function(server) {
         // 5. 누군가 접속을 해제하면 그 유저의 방은 게임을 종료한다.
 
         // 방 만들기
-        var createRoom = function() {           // 
+        var createRoom = function() {
             var roomId = uuidv4();              // 방 이름 생성
             socket.join(roomId, function() {
                 var room = { roomId: roomId, clients: [{ clientId: socket.id, ready:false }] }
                 rooms.push(room);
+
+                socket.emit('join', { roomId: roomId, clientId: socket.id });
 
             });
         }
@@ -47,14 +49,62 @@ module.exports = function(server) {
             socket.join(rooms[roomIndex].roomId, function() {
                 var client = { clientId: socket.id, ready: false }
                 rooms[roomIndex].clients.push(client);
+
+                socket.emit('join', { roomId: rooms[roomIndex].roomId, clientId: socket.id });
             })
         } else {
             // 시로운 방을 만들어서 접속한 유저 할당
             createRoom();
         } 
 
+        // 클라이언트가 Ready 되면 호출되는이벤트
+        socket.on('ready', function(data) 
+        {
+            if (!data) return;
+
+            var room = rooms.find(room => room.roomId === data.roomId);
+
+            if (room)
+            {
+                var clients = room.clients;
+                var client = clients.find(client => client.clientId === data.clientId);
+                if (client) client.ready = true;
+                // 방 안에 모두가 true이면 게임 시작
+                if (clients.length == 2)
+                {
+                    if (clients[0].ready == true && clients[1].ready == true)
+                    {
+                        // io.in(room.roomId).emit('play', { first: clients[0].clientId });
+
+                        io.to(clients[0].clientId).emit('play', { first: true});
+                        io.to(clients[1].clientId).emit('play', { first: false});
+
+                    }
+                }
+            }
+        });
+
+        socket.on('select', function(data) {
+            if (!data) return;
+            var index = data.index;
+            var roomId = data.roomId;
+            if (index > -1 && roomId)
+            {
+                socket.to(roomId).emit('selected', { index: index });
+            }
+        });
+
+        socket.on('win', function(data) {
+
+        });
+
+        socket.on('tie', function(dadta) {
+
+        });
+
         socket.on('disconnect', function(reason) {
             console.log("Disconnection");
         });
+
     });
 };
