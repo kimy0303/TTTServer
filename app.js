@@ -23,7 +23,8 @@ app.use(session({
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 // Connection URL
-const url = 'mongodb://localhost:27017';
+const url = "mongodb+srv://myfishadmin:myfishadmin1234@myserver-6wrt6.mongodb.net/test?retryWrites=true&w=majority"
+// const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'tictactoe';
 // Use connect method to connect to the server
