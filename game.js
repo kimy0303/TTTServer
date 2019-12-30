@@ -94,16 +94,48 @@ module.exports = function(server) {
             }
         });
 
+        // 클라이언트가 승리했을때
         socket.on('win', function(data) {
+            if (!data) return;
+            var roomId = data.roomId;
+            var index = data.index;
+            if (index > -1 && roomId)
+            {
+                socket.to(roomId).emit('lose', { index: index });
 
+            }
         });
 
-        socket.on('tie', function(dadta) {
-
+        // 클라이언트가 무승부
+        socket.on('tie', function(data) {
+            if (!data) return;
+            var roomId = data.roomId;
+            var index = data.index;
+            if (index > -1 && roomId)
+            {
+                socket.to(roomId).emit('tie', { index: index });
+                
+            }
         });
 
         socket.on('disconnect', function(reason) {
             console.log("Disconnection");
+
+            for (var i = 0; i < rooms.length; i++)
+            {
+                var client = rooms[i].clients.find(client => client.clientId === socket.id);
+                if (client)
+                {
+                    var clientIndex = rooms[i].clients.indexOf(client);
+                    rooms[i].clients.splice(clientIndex, 1);
+
+                    if (rooms[i].clients.length == 0)
+                    {
+                        var roomIndex = room.indexOf(rooms[i]);
+                        rooms.splice(roomIndex, 1);
+                    }
+                }
+            }
         });
 
     });
